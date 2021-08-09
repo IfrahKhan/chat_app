@@ -1,0 +1,1 @@
+This is a chat application. Created using html, css, javascript and local storage.

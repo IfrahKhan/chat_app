@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" rel="stylesheet"/>
+    <style>
+        .verticalDiv{
+			position: fixed;
+			z-index: 1;
+			height: 100%;
+			overflow-y: auto;
+        }
+        .chatSpace{
+			position: fixed;
+			left: 25%;
+			/*height: 500px;*/
+			height: 100%;
+			background-color:rgb(244, 245, 255); 
+        }
+        .selectedChat:hover{
+			background-color:#0147FA;
+			cursor: pointer;
+        }
+        #chatAreaID{
+			position: fixed;
+			left: 25%;
+			height: 100%;
+			z-index: -1;
+			overflow-y: auto;
+        }
+        #chatID{
+          	overflow-y: auto;
+        }
+        .inputDiv{
+			background-color: #eaeaea;
+			position: fixed;
+			bottom: 0;
+			left:25%;
+			width: 100%;
+			z-index: 1;
+        }
+        .inputMsg{
+          	width: 70%;
+        }
+        .btnSend{
+          	width: 4%;
+        }
+        .sendMsg{
+          	max-width: 800px;
+        }
+        .sendMsg {
+          	word-wrap: break-word;
+        }
+        /******* SCROLLBAR *******/
+        ::-webkit-scrollbar { width: 8px; background-color: gainsboro;}
+        ::-webkit-scrollbar-thumb { background:#8c9092; }
+        ::-webkit-scrollbar-thumb:hover { background: #0077b8; }
+    </style>
+  </head>
+  <body>
+    	<div class="container-fluid" id="main"></div>
+  </body>
+  <script>
+    	let mainDiv = document.getElementById("main");
+
+/********************* FIRST ROW INSIDE MAIN DIV ****************************/
+		let firstRow = document.createElement("div");
+		firstRow.className = "row";
+		mainDiv.appendChild(firstRow);
+
+		/* FIRST ROW FIRST COLUMN WITH LOGGED IN USER NAME*/
+		let r1c1 = document.createElement("div");
+		r1c1.className = "col-sm-3 pl-5 p-3 border border-secondary";
+		r1c1.style.backgroundColor = "#1464F4";
+		firstRow.appendChild(r1c1);
+
+		/* GET CURRENT USER NAME FROM THE LOCAL STORAGE */
+		let currentUser = JSON.parse(localStorage.getItem('loginUser'));
+		let currentUserID = currentUser[0].id;
+		let currentUserName = currentUser[0].name;
+
+		let userName = document.createElement("h4");
+		let text = document.createTextNode(currentUserName);
+		userName.className = "text-light";
+		userName.appendChild(text);
+		r1c1.appendChild(userName);
+
+		/* FIRST ROW SECOND COLUMN WITH WELCOME MESSAGE*/
+		let r1c2 = document.createElement("div");
+		r1c2.className = "col-sm-8 p-3 border border-right-0 border-secondary";
+		r1c2.style.zIndex = "2";
+		r1c2.style.backgroundColor = "#E0EEEE";
+		firstRow.appendChild(r1c2);
+
+		let welcomeMsg = document.createElement("h4");
+		let welcomeText = document.createTextNode("WELCOME");
+		welcomeMsg.className = "text-primary";
+		welcomeMsg.appendChild(welcomeText);
+		r1c2.appendChild(welcomeMsg);
+
+		/* FIRST ROW THIRD COLUMN WITH LOGOUT ICON*/
+		let r1c3 = document.createElement("div");
+		r1c3.className = "col-sm-1 p-3 border border-left-0 border-secondary";
+		r1c3.style.backgroundColor = "#E0EEEE";
+		firstRow.appendChild(r1c3);
+
+		let logoutIcon = document.createElement("h4");
+		logoutIcon.className = "text-primary fas fa-door-open";
+		logoutIcon.style.cursor = "pointer";
+		logoutIcon.style.fontSize = "32px";
+		r1c3.appendChild(logoutIcon);
+
+		// LOGOUT ON CLICK
+		logoutIcon.addEventListener("click", logout);
+		function logout(){
+			localStorage.removeItem('loginUser');
+			location.href = "login_form.html";
+		}
+
+
+/********************* SECOND ROW INSIDE MAIN DIV ****************************/
+		let secondRow = document.createElement("div");
+		secondRow.className = "row";
+		mainDiv.appendChild(secondRow);
+
+/********************** SECOND ROW SECOND COLUMN BEFORE CHAT IS CLICKED ***********************/
+		let r2c2 = document.createElement("div");
+		r2c2.className = "col-sm-9 border border-secondary d-flex justify-content-center align-items-center chatSpace";
+		r2c2.setAttribute("id", "chatSpace");
+		secondRow.appendChild(r2c2);
+
+		let welcomeDiv = document.createElement("div");
+		r2c2.appendChild(welcomeDiv);
+
+		let iconChat = document.createElement("h1");
+		iconChat.className = "far fa-comments display-1 text-center";
+		iconChat.style.width = "100%";
+		welcomeDiv.appendChild(iconChat);
+
+		let head = document.createElement("h4");
+		let headText = document.createTextNode("Your Messages");
+		head.className = "text-center";
+		head.appendChild(headText);
+		welcomeDiv.appendChild(head);
+
+		let para = document.createElement("p");
+		let paraText = document.createTextNode("Send messages to a friend");
+		para.className = "font-weight-light text-center";
+		para.appendChild(paraText);
+		welcomeDiv.appendChild(para);
+
+/********************** CHAT AREA AFTER USER IS CLICKED ***********************/
+		let chatArea = document.createElement("div");
+		chatArea.className = "";
+		chatArea.setAttribute("id", "chatAreaID");
+
+		let chats = document.createElement("div");
+		chats.className = "col-12 align-content-end overflow-auto";
+		chats.setAttribute("id", "chatID")
+		chats.style.width = "100%";
+		chats.style.height = "100%";
+		chatArea.appendChild(chats);
+
+
+		/******** DIV WITH INPUT AND BUTTON ********/
+		let arrForm = [];
+		arrForm = ` <div id="inputDiv" class="inputDiv border border-secondary p-3 d-flex" width="100%">
+						<input type="text" placeholder="Type a message" id="inputMsg" class="inputMsg form-control mr-2" onkeyup="enableButton(this)"/>
+						<button id="btnSend" class="btnSend btn btn-primary text-center" onclick="toSendMsg()" disabled> <i class="far fa-paper-plane"></i> </button>
+					</div>`;
+
+		/************** ENABLE SEND BUTTON ON TYPING **************/
+		function enableButton(userMsg){
+			let btnSubmit = document.getElementById("btnSend");
+			if (userMsg.value.trim() != ""){
+				btnSubmit.disabled = false;
+			} else{
+				btnSubmit.disabled = true;
+			}
+		}
+
+/*************** SECOND ROW FIRST COLUMN WITH REGISTERED USER NAMES ******************/
+		let r2c1 = document.createElement("div");
+		r2c1.className = "col-sm-3 border border-secondary verticalDiv";
+		r2c1.style.backgroundColor = "#1464F4";
+		secondRow.appendChild(r2c1);
+
+		/* GET USER */
+		let arrUserMsgs = JSON.parse(localStorage.getItem('userMsgs'));
+		let userArr = JSON.parse(localStorage.getItem("users"));
+		let arr = [];
+		let selectedUserID;
+
+		/* DISPLAY ALL THE USERS EXCEPT CURRENT USER*/
+		userArr.map((item) => {
+			if (item.id != currentUserID) {
+				let selectedChat = document.createElement("div");
+				selectedChat.className = "row border border-right-0 border-top-0 border-secondary p-3 selectedChat";
+
+				selectedChat.innerHTML +=`	<div class="col-3"> <img src="${item.image}" width="50px"></div>
+											<div class="col-6"> 
+												<h6 class="text-light my-auto"> ${item.name} </h6> 
+												<p class="text-light my-auto font-weight-light"> ...Send message...  </p>
+											</div>`;
+
+				selectedChat.addEventListener("click", () => {
+					/* STORE SELECTED USER IN THE LOCAL STORAGE */
+					let objSelectedUser = { "id" : item.id,
+										 "name" : item.name,
+										 "email" : item.email,
+										 "password" : item.password,
+										 "image" : item.image};
+					localStorage.setItem("selectedUser", JSON.stringify(objSelectedUser));
+					selectedUserID = item.id; 
+
+					// change name on top of chat
+					welcomeMsg.innerHTML = item.name;
+					// insert input fields inside chat area
+					chats.innerHTML = "";
+					chats.innerHTML += arrForm;
+					// insert chat area in the column for chating
+					document.getElementById("chatSpace").innerHTML = chatArea.innerHTML;
+
+					/******** DISPLAYING SAVED MESSAGES ********/
+					let displayMsgs = [];
+					arrUserMsgs.map((item1) => { 
+						if (currentUserID == item1.id) {
+							displayMsgs = item1.messages;
+
+							displayMsgs.map((item2) => {
+								if (item2.id == selectedUserID) {
+									let arrDisplayMsgs = item2.messages;
+									arrDisplayMsgs.map((item3) => {
+										let str = item3;
+										let indexOfmessage = arrDisplayMsgs.indexOf(item3);
+
+										let index1 = str.search("@@@");
+										let index2 = str.search("&&&");
+										let id = str.slice(0, index1);
+										let text = str.slice(index1 + 3, index2);
+										let time = str.slice(index2 +3);
+
+										/* DISPLAY SENDER MESSAGES ON RIGHT */
+										if (id == currentUserID) {
+											let savedMsgs = document.createElement("div");
+											savedMsgs.className = "row m-1";
+
+											savedMsgs.innerHTML = `<div class="col mt-1" id="removeDiv">
+																		<div class="clearfix">
+																			<div class="sendMsg row p-1 float-right" >
+																				<div class="col my-auto" style="max-width:60px"> <small class="font-weight-light"> ${time} </small></div>
+																				<div class="col my-auto" style="max-width:35px"> <i id="delete" class="far fa-trash-alt" onclick="deleteMsg(this, \'${indexOfmessage}\')"></i></div>
+																				<div class="col my-auto bg-primary" style="max-width: 600px; border-radius: 8px 8px 0 8px"> <p class="text-light my-auto p-1">${text}</p></div>
+																				<div class="col m-auto" style="max-width:60px"> <img src="${item.image}" width="40px"> </div>
+																			</div>
+																		</div>
+																	</div>`;
+											
+											chats.innerHTML += savedMsgs.innerHTML;
+											// insert chat area in the column for chating
+											document.getElementById("chatSpace").innerHTML = chatArea.innerHTML;
+										}
+										/* DISPLAY RECEIVER MESSAGES ON LEFT */
+										else if (id == selectedUserID) {
+											let savedMsgs = document.createElement("div");
+											savedMsgs.className = "row m-1 bg-primary p-5";
+
+											savedMsgs.innerHTML += `<div class="col mt-1">
+																		<div class="clearfix">
+																			<div class="sendMsg row p-1 float-left" >
+																				<div class="col m-auto" style="max-width:60px"> <img src="${item.image}" width="40px"> </div>
+																				<div class="col my-auto" style="max-width: 600px; border-radius: 8px 8px 8px 0; background-color:#E0EEEE;"> <p class="text-dark my-auto p-1">${text}</p></div>
+																				<div class="col my-auto" style="max-width:60px"> <small class="font-weight-light"> ${time} </small></div>
+																			</div>
+																		</div>
+																	</div>`;
+											
+											chats.innerHTML += savedMsgs.innerHTML;
+											// insert chat area in the column for chating
+											document.getElementById("chatSpace").innerHTML = chatArea.innerHTML;
+										}
+										
+									}); // end of arrDisplayMsgs.map
+								} // end of selected user check			
+							}); // end of displayMsgs.map
+						} // end of current user check	 
+					}); // end of arrUserMsgs.map
+				});
+				r2c1.appendChild(selectedChat);
+			}
+		}); // end of userArr.map
+
+
+		/************** SEND MESSAGE ON CLICK **************/
+		function toSendMsg(){ 
+			let inputValue= document.getElementById("inputMsg").value;
+			let selectedUser = JSON.parse(localStorage.getItem('selectedUser'));
+			let selectedUserID = selectedUser.id;
+			let selectedUserName = selectedUser.name;
+
+			for (let i = 0; i < userArr.length; i++) {
+				let today = new Date();
+				let time = today.getHours() + ":" + today.getMinutes();
+				let date = today.getDate() + "-" + today.getMonth() + "-" + today.getFullYear();
+
+				// DISPLAY SENT MSGS
+				if (userArr[i].name == currentUserName) {
+					/************* SAVING SEND MSGS ************/
+					let senderMsgs = arrUserMsgs[i].messages;
+					let newMsg = "";
+
+					if (senderMsgs.length == 0 ) { 
+						userArr.map ((item) => {
+							if (item.id != currentUserID) {
+								let msgSent = [];
+								objSenderMsgs = { "id" : item.id, "messages" : msgSent};
+								senderMsgs.push(objSenderMsgs);
+							}
+						});
+					}
+
+					let indexOfmessage;
+					senderMsgs.map((item) => {
+						if (item.id == selectedUserID) {
+							newMsg = currentUserID + "@@@" + inputValue + "&&&" + time;
+							msgSent = item.messages;
+							msgSent.push(newMsg);
+							indexOfmessage = msgSent.indexOf(newMsg);
+							localStorage.setItem('userMsgs', JSON.stringify(arrUserMsgs));
+						}
+					});
+
+
+					let arrMsgDiv = `<div class="row m-1" >
+										<div class="col mt-1">
+											<div class="clearfix">
+												<div class="sendMsg row p-1 float-right" >
+													<div class="col my-auto" style="max-width:60px"> <small class="font-weight-light">${time} </small></div>
+													<div class="col my-auto" style="max-width:35px"><i id="delete" class="far fa-trash-alt" onclick="deleteMsg(this, \'${indexOfmessage}\')"></i></div>
+													<div class="col my-auto bg-primary" style="max-width: 600px; border-radius: 8px 8px 0 8px"> <p class="text-light my-auto p-1">${inputValue}</p></div>
+													<div class="col m-auto " style="max-width:60px"> <img src="${userArr[i].image}" width="40px"> </div>
+												</div>
+											</div>
+										</div>
+									</div>`;
+					chats.innerHTML += arrMsgDiv;
+					document.getElementById("chatSpace").innerHTML = chatArea.innerHTML;
+				} // end of saving sender msg
+
+				// SAVING MSGS FOR RECEIVER
+				if (userArr[i].id == selectedUserID) { 
+					let receiverMsgs = arrUserMsgs[i].messages;
+					if (receiverMsgs.length == 0 ) {
+						userArr.map ((item) => {
+							if (item.id != selectedUserID) {
+								let msgSent = [];
+								objReceiverMsgs = { "id" : item.id, "messages" : msgSent};
+								receiverMsgs.push(objReceiverMsgs);
+							}
+						});
+					}
+
+					receiverMsgs.map((item) => {
+						if (item.id == currentUserID) {
+							newMsg = currentUserID + "@@@" + inputValue + "&&&" + time ;
+							msgSent = item.messages;
+							msgSent.push(newMsg);
+							localStorage.setItem('userMsgs', JSON.stringify(arrUserMsgs));
+						}
+					});
+				}// end of saving receiver msg
+			} //end of userArr for loop
+		}// end of function toSendMsg()
+
+		/*************** DELETE MESSAGES ***************/
+		function deleteMsg(deleteIcon, index) {
+			let deleteParent = deleteIcon.parentNode.parentNode;
+			deleteParent.remove();
+			
+			// DELETE FROM CURRENT USER ARRAY
+			arrUserMsgs.map((item1) => {
+				if (currentUserID == item1.id) {
+					displayMsgs = item1.messages;
+
+					displayMsgs.map((item2) => {
+						if (item2.id == selectedUserID) {
+							let arrDisplayMsgs = item2.messages;
+							arrDisplayMsgs.map((item3) => {
+								let indexOfmessage = arrDisplayMsgs.indexOf(item3);
+								if (indexOfmessage == index) {
+									arrDisplayMsgs.splice(indexOfmessage, 1);
+									localStorage.setItem('userMsgs', JSON.stringify(arrUserMsgs));
+								}
+							});
+						}
+					});
+				}
+			});
+
+			// DELETE FROM CLICKED USER ARRAY
+			arrUserMsgs.map((item1) => { 
+				if (selectedUserID == item1.id) {
+					displayMsgs = item1.messages;
+
+					displayMsgs.map((item2) => {
+						if (item2.id == currentUserID) {
+							let arrDisplayMsgs = item2.messages;
+							arrDisplayMsgs.map((item3) => {
+								let indexOfmessage = arrDisplayMsgs.indexOf(item3);
+								if (indexOfmessage == index) {
+									arrDisplayMsgs.splice(indexOfmessage, 1);
+									localStorage.setItem('userMsgs', JSON.stringify(arrUserMsgs));
+								}
+							});
+						}
+					});
+				}
+			});
+		}
+	</script>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+        <style>
+        body{
+            background-image: linear-gradient(to bottom right, #764ba2, #667eea);
+            background-repeat: no-repeat;
+            object-fit: cover;
+            background-size: 100%;
+            height: 100%;
+        }
+        .main_div{
+            background-color: #fff;
+            width: 470px;
+        }
+        .btn{
+            background-color: #764ba2;
+        }
+        </style>
+    </head>
+    <body>
+        <div class="container-fluid">
+            <div class="main_div m-4 p-4 mx-auto my-5 border rounded" id="login">
+                <h4 class="display-4 text-secondary my-3 text-center">Login Form</h4>
+                <form class="form-group my-3 mx-auto" method="GET" action="">
+                    <img src="user.png" alt="User" class="justify-content-center rounded-circle mx-auto d-block" style="width:100px;"><br>
+                    <input class="form-control my-2" id="txt_email" type="text" placeholder="Email" required>
+                    <input class="form-control my-2" id="txt_pass" type="password" placeholder="Password" required>
+
+                    <p class="text-center text-secondary my-4 p-0" id="msg"> &nbsp; </p>
+                    <input class="btn btn-block my-2 text-light font-weight-bold" type="button" value="Login" onclick="check()">
+
+                    <p class="text-center text-secondary my-4">
+                        Not Registered?
+                        <span> <a href="signup_form.html">Create an account</a> </span>
+                    </p>
+                </form>
+            </div> 
+        </div>
+    </body>
+    <script>
+        let txtMsg = "";
+        function check(){
+            let emailValue = document.getElementById("txt_email").value;
+            let passValue = document.getElementById("txt_pass").value;
+            
+            let checkUser = JSON.parse(localStorage.getItem('users'));
+
+            // VALIDATION
+            for (let i=0; i<checkUser.length; i++){
+                if (checkUser[i].email == emailValue && checkUser[i].password == passValue){
+                    objUser = { "id": checkUser[i].id,
+                                "name": checkUser[i].name,
+                                "email": checkUser[i].email,
+                                "password": checkUser[i].password
+                                };
+                    let arr = [objUser];
+                    localStorage.setItem('loginUser', JSON.stringify(arr));
+                    location.href = "chat_dashboard.html";
+                    break;
+                }
+                else{
+                    txtMsg = "Invalid Email or Pass";
+                }
+            }
+            document.getElementById("msg").innerHTML = txtMsg;
+        }
+    </script>
+</html>
